@@ -267,6 +267,9 @@
       Imported records and Amidyne statuses are saved automatically
       on this device after every change.
     </p>
+    <button id="exportBackup" class="primary">
+  Export Backup CSV
+</button>
     <button id="clearLocal" class="danger">
       Clear all PolePilot local data
     </button>
@@ -644,6 +647,123 @@ document
   .addEventListener("input", renderSearch);
 
 document
+  function csvEscape(value) {
+  const text = String(value ?? "");
+
+  if (
+    text.includes(",") ||
+    text.includes('"') ||
+    text.includes("\n") ||
+    text.includes("\r")
+  ) {
+    return '"' + text.replaceAll('"', '""') + '"';
+  }
+
+  return text;
+}
+
+function buildBackupCSV() {
+  if (!rows.length) {
+    throw new Error("No PolePilot data is loaded.");
+  }
+
+  const headers = [];
+
+  rows.forEach(row => {
+    Object.keys(row).forEach(key => {
+      if (!headers.includes(key)) {
+        headers.push(key);
+      }
+    });
+  });
+
+  const lines = [];
+
+  lines.push(
+    headers.map(csvEscape).join(",")
+  );
+
+  rows.forEach(row => {
+    lines.push(
+      headers
+        .map(header => csvEscape(row[header]))
+        .join(",")
+    );
+  });
+
+  return "\uFEFF" + lines.join("\r\n");
+}
+
+document
+  .getElementById("exportBackup")
+  .addEventListener("click", async () => {
+
+    try {
+      const csv = buildBackupCSV();
+
+      const stamp =
+        new Date()
+          .toISOString()
+          .replaceAll(":", "-")
+          .replace("T", "_")
+          .slice(0, 16);
+
+      const filename =
+        "PolePilot_Backup_" +
+        stamp +
+        ".csv";
+
+      const file = new File(
+        [csv],
+        filename,
+        { type: "text/csv;charset=utf-8" }
+      );
+
+      /*
+       * iPhone/iPad:
+       * Prefer the native Share sheet.
+       * This lets you choose "Save to Files".
+       */
+      if (
+        navigator.share &&
+        navigator.canShare &&
+        navigator.canShare({ files: [file] })
+      ) {
+        await navigator.share({
+          files: [file],
+          title: "PolePilot Backup"
+        });
+
+        return;
+      }
+
+      /*
+       * Fallback for browsers without file sharing.
+       */
+      const url =
+        URL.createObjectURL(file);
+
+      const link =
+        document.createElement("a");
+
+      link.href = url;
+      link.download = filename;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 1000);
+    }
+    catch (error) {
+      alert(
+        "Backup failed: " +
+        error.message
+      );
+    }
+  });
   .getElementById("clearLocal")
   .addEventListener("click", () => {
 
