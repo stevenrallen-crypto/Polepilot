@@ -3,262 +3,213 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#111827">
-  <title>PolePilot v0.3</title>
+  <title>PolePilot v0.3.1</title>
 
   <style>
-    * { box-sizing: border-box; }
-
     body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       background: #f3f4f6;
+      margin: 0;
+      padding: 20px;
       color: #111827;
     }
 
-    main {
-      max-width: 650px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    h1 {
-      margin-bottom: 4px;
-    }
-
-    .subtitle {
-      color: #6b7280;
-      margin-top: 0;
+    .wrap {
+      max-width: 600px;
+      margin: auto;
     }
 
     .card {
       background: white;
+      padding: 20px;
       border-radius: 16px;
-      padding: 18px;
-      margin: 16px 0;
-      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      margin-bottom: 16px;
     }
 
     .barcode {
-      font-size: 28px;
+      font-size: 30px;
       font-weight: 700;
+      margin-bottom: 8px;
     }
 
     .pa {
       color: #6b7280;
-      margin-top: 4px;
-    }
-
-    .scope {
-      margin-top: 14px;
-      font-size: 17px;
-    }
-
-    .progress {
-      font-weight: 600;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .status-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      margin-top: 18px;
+      margin: 20px 0;
     }
 
     button {
-      font-size: 16px;
-      padding: 14px 10px;
+      padding: 14px;
       border-radius: 12px;
-      border: 1px solid #d1d5db;
+      border: 1px solid #ccc;
       background: white;
-      color: #111827;
+      font-size: 16px;
     }
 
     button.selected {
       background: #111827;
       color: white;
-      border-color: #111827;
     }
 
-    .save {
+    #saveNext {
       width: 100%;
-      margin-top: 16px;
       background: #2563eb;
       color: white;
       border: none;
       font-weight: 700;
     }
 
-    .nav-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .feedback {
-      margin-top: 14px;
-      min-height: 24px;
-      font-weight: 600;
-    }
-
     .saved {
-      color: #15803d;
+      color: green;
+      font-weight: 700;
+      margin-top: 12px;
     }
 
-    .summary-row {
+    .row {
       display: flex;
       justify-content: space-between;
-      gap: 12px;
-      padding: 10px 0;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .small {
-      color: #6b7280;
-      font-size: 14px;
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 130px;
-      border-radius: 12px;
-      border: 1px solid #d1d5db;
-      padding: 10px;
-      font-size: 14px;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
     }
   </style>
 </head>
 
 <body>
-<main>
-  <h1>PolePilot v0.3</h1>
-  <p class="subtitle">Persistence torture test 🐹</p>
+  <div class="wrap">
+    <h1>PolePilot v0.3.1</h1>
+    <p>Persistence torture test 🐹</p>
 
-  <div class="card">
-    <div class="progress" id="progress"></div>
+    <div class="card">
+      <div id="progress"></div>
+      <div id="barcode" class="barcode"></div>
+      <div id="pa" class="pa"></div>
+      <div id="scope"></div>
 
-    <div class="barcode" id="barcode"></div>
-    <div class="pa" id="pa"></div>
-    <div class="scope" id="scope"></div>
+      <div id="statusButtons" class="status-grid"></div>
 
-    <div class="status-grid" id="statusButtons"></div>
+      <button id="saveNext">Save & Next →</button>
 
-    <button class="save" id="saveNext">Save & Next →</button>
-
-    <div class="nav-row">
-      <button id="back">← Back</button>
-      <button id="next">Next →</button>
+      <div id="feedback"></div>
     </div>
 
-    <div class="feedback" id="feedback"></div>
+    <div class="card">
+      <strong>Saved results</strong>
+      <div id="summary"></div>
+    </div>
   </div>
 
-  <div class="card">
-    <strong>Saved test results</strong>
-    <div id="summary"></div>
-  </div>
+  <script>
+    const poles = [
+      { barcode: "TEST-001", pa: "TEST-PA-A", scope: "Fake test pole 1" },
+      { barcode: "TEST-002", pa: "TEST-PA-A", scope: "Fake test pole 2" },
+      { barcode: "TEST-003", pa: "TEST-PA-B", scope: "Fake test pole 3" },
+      { barcode: "TEST-004", pa: "TEST-PA-B", scope: "Fake test pole 4" },
+      { barcode: "TEST-005", pa: "TEST-PA-C", scope: "Fake test pole 5" }
+    ];
 
-  <div class="card">
-    <strong>Emergency recovery copy</strong>
-    <p class="small">
-      This updates after every save. It is only a fallback while the page is open.
-    </p>
-    <textarea id="recovery" readonly></textarea>
-  </div>
-</main>
+    const statuses = [
+      "Open",
+      "Complete",
+      "Hold-off Required",
+      "Needs Review",
+      "Not in Amidyne"
+    ];
 
-<script>
-const poles = [
-  {
-    barcode: "TEST-001",
-    pa: "TEST-PA-A",
-    scope: "Fake test pole — choose any status"
-  },
-  {
-    barcode: "TEST-002",
-    pa: "TEST-PA-A",
-    scope: "Fake test pole — choose any status"
-  },
-  {
-    barcode: "TEST-003",
-    pa: "TEST-PA-B",
-    scope: "Fake test pole — choose any status"
-  },
-  {
-    barcode: "TEST-004",
-    pa: "TEST-PA-B",
-    scope: "Fake test pole — choose any status"
-  },
-  {
-    barcode: "TEST-005",
-    pa: "TEST-PA-C",
-    scope: "Fake test pole — choose any status"
-  }
-];
+    const STORAGE_KEY = "polepilot-v031";
 
-const statuses = [
-  "Open",
-  "Complete",
-  "Hold-off Required",
-  "Needs Review",
-  "Not in Amidyne"
-];
+    let currentIndex = 0;
+    let selectedStatus = "";
+    let savedData = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
 
-const STORAGE_KEY = "polepilot-v03-test-data";
-
-let currentIndex = 0;
-let selectedStatus = "";
-
-function loadSavedData() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-  } catch {
-    return {};
-  }
-}
-
-let savedData = loadSavedData();
-
-function persist() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(savedData));
-}
-
-function renderStatusButtons() {
-  const box = document.getElementById("statusButtons");
-  box.innerHTML = "";
-
-  statuses.forEach(status => {
-    const button = document.createElement("button");
-    button.textContent = status;
-
-    if (selectedStatus === status) {
-      button.classList.add("selected");
+    function saveStorage() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedData));
     }
 
-    button.addEventListener("click", () => {
-      selectedStatus = status;
+    function render() {
+      const pole = poles[currentIndex];
+
+      document.getElementById("progress").textContent =
+        (currentIndex + 1) + " / " + poles.length;
+
+      document.getElementById("barcode").textContent = pole.barcode;
+      document.getElementById("pa").textContent = pole.pa;
+      document.getElementById("scope").textContent = pole.scope;
+
+      selectedStatus = savedData[pole.barcode] || "";
+
+      const buttons = document.getElementById("statusButtons");
+      buttons.innerHTML = "";
+
+      statuses.forEach(status => {
+        const button = document.createElement("button");
+        button.textContent = status;
+
+        if (status === selectedStatus) {
+          button.classList.add("selected");
+        }
+
+        button.addEventListener("click", () => {
+          selectedStatus = status;
+          render();
+        });
+
+        buttons.appendChild(button);
+      });
+
+      renderSummary();
+    }
+
+    function renderSummary() {
+      const summary = document.getElementById("summary");
+      summary.innerHTML = "";
+
+      poles.forEach(pole => {
+        const row = document.createElement("div");
+        row.className = "row";
+
+        const left = document.createElement("span");
+        left.textContent = pole.barcode;
+
+        const right = document.createElement("span");
+        right.textContent = savedData[pole.barcode] || "Unverified";
+
+        row.appendChild(left);
+        row.appendChild(right);
+        summary.appendChild(row);
+      });
+    }
+
+    document.getElementById("saveNext").addEventListener("click", () => {
+      if (!selectedStatus) {
+        document.getElementById("feedback").textContent =
+          "Choose a status first.";
+        return;
+      }
+
+      const pole = poles[currentIndex];
+
+      savedData[pole.barcode] = selectedStatus;
+      saveStorage();
+
+      document.getElementById("feedback").textContent =
+        "✓ SAVED: " + pole.barcode + " — " + selectedStatus;
+
+      document.getElementById("feedback").className = "saved";
+
+      if (currentIndex < poles.length - 1) {
+        currentIndex++;
+      }
+
       render();
     });
 
-    box.appendChild(button);
-  });
-}
-
-function renderSummary() {
-  const summary = document.getElementById("summary");
-  summary.innerHTML = "";
-
-  poles.forEach(pole => {
-    const row = document.createElement("div");
-    row.className = "summary-row";
-
-    const left = document.createElement("span");
-    left.textContent = pole.barcode;
-
-    const right = document.createElement("span");
-    right.textContent = savedData[pole.barcode]?.status || "Unverified";
-
-    row.append(left, right);
-    summary.appendChild(row
+    render();
+  </script>
+</body>
+</html>
