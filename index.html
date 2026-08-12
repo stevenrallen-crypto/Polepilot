@@ -267,7 +267,7 @@
       Imported records and Amidyne statuses are saved automatically
       on this device after every change.
     </p>
-    <button id="exportBackup" class="primary">
+    <button id="exportBackup" class="primary"
   Export Backup CSV
 </button>
     <button id="clearLocal" class="danger">
@@ -798,6 +798,10 @@ function buildBackupCSV() {
   });
 
 renderPole();
+
+  document.getElementById("exportBackup").addEventListener("click", function () {
+  alert("PolePilot export button is alive.");
+});
 </script>
 </body>
 </html>
