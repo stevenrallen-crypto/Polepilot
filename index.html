@@ -694,30 +694,41 @@ function buildBackupCSV() {
   return "\uFEFF" + lines.join("\r\n");
 }
 
-document
+  document
   .getElementById("exportBackup")
-  .addEventListener("click", async () => {
+  .addEventListener("click", () => {
 
     try {
       const csv = buildBackupCSV();
 
-      const stamp =
-        new Date()
-          .toISOString()
-          .replaceAll(":", "-")
-          .replace("T", "_")
-          .slice(0, 16);
-
-      const filename =
-        "PolePilot_Backup_" +
-        stamp +
-        ".csv";
-
-      const file = new File(
+      const blob = new Blob(
         [csv],
-        filename,
         { type: "text/csv;charset=utf-8" }
       );
+
+      const url = URL.createObjectURL(blob);
+
+      const backupWindow =
+        window.open(url, "_blank");
+
+      if (!backupWindow) {
+        alert(
+          "Safari blocked the backup window. " +
+          "Allow pop-ups for PolePilot and try again."
+        );
+      }
+
+      setTimeout(() => {
+        URL.revokeObjectURL(url);
+      }, 60000);
+    }
+    catch (error) {
+      alert(
+        "Backup failed: " +
+        error.message
+      );
+    }
+  });
 
       /*
        * iPhone/iPad:
