@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#111827">
+  <title>PolePilot v0.5</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f3f4f6;
+      color: #111827;
+      margin: 0;
+      padding: 18px;
+    }
+
+    .wrap {
+      max-width: 700px;
+      margin: auto;
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0;
+    }
+
+    .subtitle {
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .believe {
+      background: #facc15;
+      color: #111827;
+      padding: 7px 13px;
+      font-weight: 800;
+      transform: rotate(-2deg);
+      box-shadow: 2px 3px 0 #111827;
+    }
+
+    .card {
+      background: white;
+      padding: 18px;
+      border-radius: 16px;
+      margin-bottom: 14px;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .metric {
+      background: white;
+      border-radius: 14px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 22px;
+    }
+
+    .small {
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    input[type="file"],
+    input[type="search"] {
+      width: 100%;
+      font-size: 16px;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      margin-top: 8px;
+    }
+
+    .barcode {
+      font-size: 30px;
+      font-weight: 800;
+      margin-top: 6px;
+    }
+
+    .pa {
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .scope {
+      font-size: 17px;
+      margin-top: 14px;
+    }
+
+    .worktype {
+      font-size: 14px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin: 18px 0;
+    }
+
+    button {
+      padding: 13px;
+      border-radius: 12px;
+      border: 1px solid #d1d5db;
+      background: white;
+      color: #111827;
+      font-size: 16px;
+    }
+
+    button.selected {
+      background: #111827;
+      color: white;
+      border-color: #111827;
+    }
+
+    .primary {
+      width: 100%;
+      background: #2563eb;
+      color: white;
+      border: none;
+      font-weight: 800;
+    }
+
+    .nav {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-top: 9px;
+    }
+
+    .feedback {
+      min-height: 24px;
+      margin-top: 12px;
+      font-weight: 700;
+    }
+
+    .saved {
+      color: #15803d;
+    }
+
+    .search-result {
+      padding: 11px 0;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .search-result button {
+      width: 100%;
+      text-align: left;
+    }
+
+    .links {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-top: 12px;
+    }
+
+    .links a {
+      display: block;
+      text-align: center;
+      text-decoration: none;
+      color: #2563eb;
+      border: 1px solid #d1d5db;
+      padding: 12px;
+      border-radius: 12px;
+    }
+
+    .danger {
+      color: #b91c1c;
+    }
+  .filter-grid,.queue-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px} select{width:100%;font-size:16px;padding:12px;border:1px solid #d1d5db;border-radius:12px;background:white}.queue-result{padding:10px 0;border-bottom:1px solid #e5e7eb}.queue-result label{display:grid;grid-template-columns:auto 1fr;gap:10px}.queue-result input{width:22px;height:22px}.queue-meta{color:#6b7280;font-size:13px;margin-top:3px}.queue-summary{margin:12px 0;font-weight:800}</style>
+</head>
+
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div>
+      <h1>PolePilot v0.5</h1>
+      <div class="subtitle">Local field-data prototype 🐹</div>
+    </div>
+    <div class="believe">BELIEVE</div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric">
+      <strong id="totalCount">0</strong>
+      <span class="small">Loaded</span>
+    </div>
+    <div class="metric">
+      <strong id="verifiedCount">0</strong>
+      <span class="small">Verified</span>
+    </div>
+    <div class="metric">
+      <strong id="remainingCount">0</strong>
+      <span class="small">Unverified</span>
+    </div>
+  </div>
+
+  <div class="card" id="importCard">
+    <strong>Load Essex database</strong>
+    <p class="small">
+      The CSV stays on this iPad. Nothing is uploaded to GitHub.
+    </p>
+    <input id="fileInput" type="file" accept=".csv,text/csv">
+    <div id="importFeedback" class="feedback"></div>
+  </div>
+
+  <div class="card">
+    <strong>Search</strong>
+    <input id="search" type="search"
+           placeholder="Barcode or PA — e.g. B6FXRQ or 14239">
+    <div id="searchResults"></div>
+  </div>
+
+  <div class="card"><strong>Work Queue</strong><p class="small">Filter the Essex list, select structures, then work through only that queue.</p><div class="filter-grid"><select id="paFilter"><option value="">All PAs</option></select><select id="statusFilter"><option value="">All statuses</option><option>Open</option><option>Complete</option><option>Hold-off Required</option><option>Needs Review</option><option>Not in Amidyne</option><option value="__UNVERIFIED__">Unverified</option></select><select id="workTypeFilter"><option value="">All work types</option></select><select id="queueMode"><option value="filtered">Filtered results</option><option value="selected">Selected queue only</option></select></div><div class="queue-actions"><button id="selectFiltered">Select filtered</button><button id="clearQueue">Clear queue</button></div><div id="queueSummary" class="queue-summary">0 selected</div><div id="queueResults"></div><button id="startQueue" class="primary" type="button">Start Selected Queue →</button><div id="queueFeedback" class="feedback"></div></div><div class="card" id="poleCard" style="display:none;">
+    <div id="progress" class="small"></div>
+
+    <div id="barcode" class="barcode"></div>
+    <div id="pa" class="pa"></div>
+
+    <div id="scope" class="scope"></div>
+    <div id="worktype" class="worktype"></div>
+
+    <div id="statusButtons" class="status-grid"></div>
+
+    <button id="saveNext" class="primary">
+      Save & Next →
+    </button>
+
+    <div class="nav">
+      <button id="back">← Back</button>
+      <button id="next">Next →</button>
+    </div>
+
+    <div class="links">
+      <a id="streetView" href="#" target="_blank">Street View</a>
+      <a id="navigate" href="#" target="_blank">Navigate</a>
+    </div>
+
+    <div id="feedback" class="feedback"></div>
+  </div>
+
+  <div class="card">
+    <strong>Local persistence</strong>
+    <p class="small">
+      Imported records and Amidyne statuses are saved automatically
+      on this device after every change.
+    </p>
+    <button id="exportBackup" class="primary" type="button">
+      Export Backup CSV
+    </button>
+    <button id="clearLocal" class="danger">
+      Clear all PolePilot local data
+    </button>
+  </div>
+
+</div>
+
+<script>
+const DATA_KEY = "polepilot-v04-data";
+const INDEX_KEY = "polepilot-v04-index";
+const QUEUE_KEY = "polepilot-v05-queue";
+
+const statuses = [
+  "Open",
+  "Complete",
+  "Hold-off Required",
+  "Needs Review",
+  "Not in Amidyne"
+];
+
+let rows = loadRows();
+let currentIndex =
+  parseInt(localStorage.getItem(INDEX_KEY) || "0", 10);
+
+let selectedStatus = "";
+let queue = JSON.parse(localStorage.getItem(QUEUE_KEY) || "[]");
+let activeQueue=[];
+let activeQueuePosition=-1;
+
+function rowKey(r){return String(r.Barcode||"")+"|"+String(r.PA||"");}
+function saveQueue(){localStorage.setItem(QUEUE_KEY,JSON.stringify(queue));}
+function populateFilters(){const p=document.getElementById("paFilter"),w=document.getElementById("workTypeFilter"); const pv=p.value,wv=w.value; const pas=[...new Set(rows.map(r=>String(r.PA||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})); const types=[...new Set(rows.map(r=>String(r["Work Type"]||"").trim()).filter(Boolean))].sort(); p.innerHTML='<option value="">All PAs</option>'; pas.forEach(v=>p.add(new Option(v,v))); w.innerHTML='<option value="">All work types</option>'; types.forEach(v=>w.add(new Option(v,v))); if(pas.includes(pv))p.value=pv;if(types.includes(wv))w.value=wv;}
+function filteredItems(){const p=paFilter.value,s=statusFilter.value,w=workTypeFilter.value,m=queueMode.value;return rows.map((row,index)=>({row,index})).filter(x=>(!p||x.row.PA===p)&&(!s||(s==="__UNVERIFIED__"?!getStatus(x.row):getStatus(x.row)===s))&&(!w||x.row["Work Type"]===w)&&(m!=="selected"||queue.includes(rowKey(x.row))));}
+function renderWorkQueue(){const box=document.getElementById("queueResults"),items=filteredItems();queueSummary.textContent=queue.length+" selected • "+items.length+" shown";box.innerHTML="";items.slice(0,100).forEach(x=>{const d=document.createElement("div");d.className="queue-result";const l=document.createElement("label"),c=document.createElement("input"),z=document.createElement("div");c.type="checkbox";c.checked=queue.includes(rowKey(x.row));c.onchange=()=>{const k=rowKey(x.row);if(c.checked&&!queue.includes(k))queue.push(k);if(!c.checked)queue=queue.filter(q=>q!==k);saveQueue();renderWorkQueue();};z.innerHTML="<strong>"+(x.row.Barcode||"Unknown")+"</strong><div class='queue-meta'>"+(x.row.PA||"No PA")+" • "+(x.row["Work Type"]||"No work type")+" • "+(getStatus(x.row)||"Unverified")+"</div>";l.append(c,z);d.append(l);box.append(d);});}
+function startSelectedQueue(){activeQueue=queue.map(k=>rows.findIndex(r=>rowKey(r)===k)).filter(i=>i>=0);if(!activeQueue.length){queueFeedback.textContent="Select at least one structure first.";return;}activeQueuePosition=0;goTo(activeQueue[0]);queueFeedback.textContent="✓ Queue started: "+activeQueue.length+" structures";queueFeedback.className="feedback saved";poleCard.scrollIntoView({behavior:"smooth"});}
+function nextQueued(){if(!activeQueue.length||activeQueuePosition<0)return false;if(activeQueuePosition<activeQueue.length-1){activeQueuePosition++;goTo(activeQueue[activeQueuePosition]);return true;}feedback.textContent="✓ End of selected work queue.";feedback.className="feedback saved";return true;}
+function loadRows() {
+  try {
+    return JSON.parse(localStorage.getItem(DATA_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveRows() {
+  localStorage.setItem(DATA_KEY, JSON.stringify(rows));
+}
+
+function parseCSV(text) {
+  const matrix = [];
+  let row = [];
+  let field = "";
+  let quoted = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    const next = text[i + 1];
+
+    if (c === '"') {
+      if (quoted && next === '"') {
+        field += '"';
+        i++;
+      } else {
+        quoted = !quoted;
+      }
+    }
+    else if (c === "," && !quoted) {
+      row.push(field);
+      field = "";
+    }
+    else if ((c === "\n" || c === "\r") && !quoted) {
+      if (c === "\r" && next === "\n") i++;
+
+      row.push(field);
+      field = "";
+
+      if (row.some(v => v !== "")) matrix.push(row);
+      row = [];
+    }
+    else {
+      field += c;
+    }
+  }
+
+  if (field || row.length) {
+    row.push(field);
+    matrix.push(row);
+  }
+
+  return matrix;
+}
+
+function importCSV(text) {
+  const matrix = parseCSV(text);
+
+  if (matrix.length < 2) {
+    throw new Error("CSV appears empty.");
+  }
+
+  const headers =
+    matrix[0].map(h => h.replace(/^\uFEFF/, "").trim());
+
+  const imported = matrix.slice(1).map(values => {
+    const obj = {};
+
+    headers.forEach((header, i) => {
+      obj[header] = values[i] ?? "";
+    });
+
+    if (!obj["Amidyne Status"]) {
+      obj["Amidyne Status"] = "";
+    }
+
+    if (!obj["Last Updated"]) {
+      obj["Last Updated"] = "";
+    }
+
+    return obj;
+  });
+
+  return imported.filter(r => r.Barcode);
+}
+
+function getStatus(row) {
+  return row["Amidyne Status"] || "";
+}
+
+function updateMetrics() {
+  const verified =
+    rows.filter(r => getStatus(r)).length;
+
+  document.getElementById("totalCount").textContent =
+    rows.length;
+
+  document.getElementById("verifiedCount").textContent =
+    verified;
+
+  document.getElementById("remainingCount").textContent =
+    rows.length - verified;
+}
+
+function renderPole() {
+  const card = document.getElementById("poleCard");
+
+  if (!rows.length) {
+    card.style.display = "none";
+    updateMetrics();
+    return;
+  }
+
+  if (currentIndex < 0) currentIndex = 0;
+  if (currentIndex >= rows.length) currentIndex = rows.length - 1;
+
+  localStorage.setItem(INDEX_KEY, currentIndex);
+
+  const row = rows[currentIndex];
+
+  selectedStatus = getStatus(row);
+
+  card.style.display = "block";
+
+  document.getElementById("progress").textContent =
+    (currentIndex + 1) + " / " + rows.length;
+
+  document.getElementById("barcode").textContent =
+    row.Barcode || "Unknown barcode";
+
+  document.getElementById("pa").textContent =
+    row.PA || "";
+
+  document.getElementById("scope").textContent =
+    row.Scope || "No scope recorded";
+
+  document.getElementById("worktype").textContent =
+    row["Work Type"] || "";
+
+  const street = document.getElementById("streetView");
+  const nav = document.getElementById("navigate");
+
+  street.href = row["Street View"] || "#";
+  nav.href = row.Navigation || "#";
+
+  street.style.opacity =
+    row["Street View"] ? "1" : ".35";
+
+  nav.style.opacity =
+    row.Navigation ? "1" : ".35";
+
+  renderStatusButtons();
+  updateMetrics();
+}
+
+function renderStatusButtons() {
+  const container =
+    document.getElementById("statusButtons");
+
+  container.innerHTML = "";
+
+  statuses.forEach(status => {
+    const button = document.createElement("button");
+    button.textContent = status;
+
+    if (status === selectedStatus) {
+      button.classList.add("selected");
+    }
+
+    button.addEventListener("click", () => {
+      selectedStatus = status;
+      renderStatusButtons();
+    });
+
+    container.appendChild(button);
+  });
+}
+
+function saveCurrent() {
+  if (!selectedStatus) {
+    const feedback =
+      document.getElementById("feedback");
+
+    feedback.textContent =
+      "Choose an Amidyne status first.";
+
+    feedback.className = "feedback";
+    return false;
+  }
+
+  const row = rows[currentIndex];
+
+  row["Amidyne Status"] = selectedStatus;
+  row["Last Updated"] =
+    new Date().toISOString();
+
+  saveRows();
+
+  const feedback =
+    document.getElementById("feedback");
+
+  feedback.textContent =
+    "✓ SAVED: " +
+    row.Barcode +
+    " — " +
+    selectedStatus;
+
+  feedback.className =
+    "feedback saved";
+
+  updateMetrics();
+
+  return true;
+}
+
+function goTo(index) {
+  currentIndex = index;
+
+  document.getElementById("feedback").textContent = "";
+
+  renderPole();
+}
+
+function renderSearch() {
+  const query =
+    document.getElementById("search")
+      .value.trim()
+      .toUpperCase();
+
+  const box =
+    document.getElementById("searchResults");
+
+  box.innerHTML = "";
+
+  if (!query || !rows.length) return;
+
+  const matches = rows
+    .map((row, index) => ({ row, index }))
+    .filter(item => {
+      const barcode =
+        String(item.row.Barcode || "").toUpperCase();
+
+      const pa =
+        String(item.row.PA || "").toUpperCase();
+
+      return barcode.includes(query) ||
+             pa.includes(query);
+    })
+    .slice(0, 25);
+
+  matches.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "search-result";
+
+    const button = document.createElement("button");
+
+    const status =
+      getStatus(item.row) || "Unverified";
+
+    button.textContent =
+      item.row.Barcode +
+      " — " +
+      item.row.PA +
+      " — " +
+      status;
+
+    button.addEventListener("click", () => {
+      goTo(item.index);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    div.appendChild(button);
+    box.appendChild(div);
+  });
+}
+
+document
+  .getElementById("fileInput")
+  .addEventListener("change", async event => {
+
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+
+      rows = importCSV(text);
+
+      currentIndex = 0;
+
+      saveRows();
+
+      localStorage.setItem(INDEX_KEY, "0");
+
+      const feedback =
+        document.getElementById("importFeedback");
+
+      feedback.textContent =
+        "✓ LOADED & SAVED LOCALLY: " +
+        rows.length +
+        " records";
+
+      feedback.className =
+        "feedback saved";
+
+      populateFilters();
+      renderPole();
+      renderSearch();
+      renderWorkQueue();
+    }
+    catch (error) {
+      document.getElementById("importFeedback")
+        .textContent =
+        "Import failed: " + error.message;
+    }
+  });
+
+document
+  .getElementById("saveNext")
+  .addEventListener("click", () => {
+
+    if (!saveCurrent()) return;
+
+    setTimeout(()=>{if(!nextQueued() && currentIndex < rows.length-1) goTo(currentIndex+1);},300);
+  });
+
+document
+  .getElementById("back")
+  .addEventListener("click", () => {
+
+    if (currentIndex > 0) {
+      goTo(currentIndex - 1);
+    }
+  });
+
+document
+  .getElementById("next")
+  .addEventListener("click", () => {
+
+    if (currentIndex < rows.length - 1) {
+      goTo(currentIndex + 1);
+    }
+  });
+
+document
+  .getElementById("search")
+  .addEventListener("input", renderSearch);
+["paFilter","statusFilter","workTypeFilter","queueMode"].forEach(id=>document.getElementById(id).addEventListener("change",renderWorkQueue));
+selectFiltered.addEventListener("click",()=>{filteredItems().forEach(x=>{const k=rowKey(x.row);if(!queue.includes(k))queue.push(k);});saveQueue();renderWorkQueue();});
+clearQueue.addEventListener("click",()=>{queue=[];activeQueue=[];activeQueuePosition=-1;saveQueue();renderWorkQueue();queueFeedback.textContent="Queue cleared.";});
+startQueue.addEventListener("click",startSelectedQueue);
+
+
+
+function csvEscape(value) {
+  const text = String(value ?? "");
+  if (text.includes(",") || text.includes('"') || text.includes("\n") || text.includes("\r")) {
+    return '"' + text.replaceAll('"', '""') + '"';
+  }
+  return text;
+}
+
+function buildBackupCSV() {
+  if (!rows.length) throw new Error("No PolePilot data is loaded.");
+
+  const headers = [];
+  rows.forEach(row => {
+    Object.keys(row).forEach(key => {
+      if (!headers.includes(key)) headers.push(key);
+    });
+  });
+
+  const lines = [headers.map(csvEscape).join(",")];
+  rows.forEach(row => {
+    lines.push(headers.map(header => csvEscape(row[header] ?? "")).join(","));
+  });
+
+  return "\uFEFF" + lines.join("\r\n");
+}
+
+document.getElementById("exportBackup").addEventListener("click", () => {
+  try {
+    const csv = buildBackupCSV();
+    const stamp = new Date().toISOString().replaceAll(":", "-").replace("T", "_").slice(0, 16);
+    const filename = "PolePilot_Backup_" + stamp + ".csv";
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = filename;
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+    const feedback = document.getElementById("importFeedback");
+    feedback.textContent = "✓ BACKUP CREATED: " + filename;
+    feedback.className = "feedback saved";
+  } catch (error) {
+    alert("Backup failed: " + error.message);
+  }
+});
+
+document.getElementById("clearLocal").addEventListener("click", () => {
+  const confirmed = confirm("Delete all PolePilot data saved on this iPad?");
+  if (!confirmed) return;
+
+  localStorage.removeItem(DATA_KEY);
+  localStorage.removeItem(INDEX_KEY);
+  localStorage.removeItem(QUEUE_KEY);
+  rows = [];
+  currentIndex = 0;
+
+  document.getElementById("searchResults").innerHTML = "";
+  document.getElementById("importFeedback").textContent = "";
+  renderPole();
+});
+
+populateFilters();
+renderPole();
+renderWorkQueue();
+</script>
+</body>
+</html>
