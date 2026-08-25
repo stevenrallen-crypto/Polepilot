@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#111827">
-  <title>PolePilot v0.6-beta8.4-manual-feeder</title>
+  <title>PolePilot v0.6-beta8.7-Marmota-real-record-lab</title>
 
   <style>
     * { box-sizing: border-box; }
@@ -303,6 +303,16 @@
 .endday-actions button{font-weight:800}
 .endday-note{font-size:13px;color:#6b7280;margin-top:6px}
 
+
+.cloud-test{border:2px solid #bfdbfe;background:#eff6ff}
+.cloud-test-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+.cloud-test input{width:100%;font-size:16px;padding:11px;border:1px solid #d1d5db;border-radius:10px;margin-top:7px}
+.cloud-pill{display:inline-block;font-size:12px;font-weight:800;padding:5px 8px;border-radius:999px;background:#dbeafe;margin-left:6px}
+.cloud-result{margin-top:10px;padding:10px;border-radius:10px;background:white;border:1px solid #dbeafe;white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+.sync-state{display:inline-block;margin-top:10px;padding:7px 10px;border-radius:999px;font-size:13px;font-weight:900;border:1px solid #d1d5db;background:white}
+.sync-local{background:#f3f4f6}.sync-pending{background:#fef3c7;border-color:#f59e0b}.sync-syncing{background:#dbeafe;border-color:#60a5fa}.sync-synced{background:#dcfce7;border-color:#4ade80}.sync-error{background:#fee2e2;border-color:#f87171}.sync-offline{background:#fef3c7;border-color:#f59e0b}
+.marmota-lab{margin-top:14px;padding:14px;border:2px solid #d6d3d1;border-radius:14px;background:#fafaf9}.marmota-head{display:flex;justify-content:space-between;align-items:center;gap:8px}.marmota-pill{font-size:12px;font-weight:900;padding:5px 8px;border-radius:999px;background:#e7e5e4}.marmota-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.marmota-result{margin-top:9px;padding:9px;border-radius:10px;background:white;border:1px solid #d6d3d1;font-size:12px;white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+
 </style>
 </head>
 
@@ -311,9 +321,9 @@
 
   <div class="top">
     <div>
-      <h1>PolePilot v0.6-beta8.4-manual-feeder</h1>
-      <div class="subtitle">Manual Feeder Entry beta ⚡</div>
-      <div class="small" id="buildHealth" style="margin-top:6px;font-weight:800">Build beta8.4 • checking local data…</div>
+      <h1>PolePilot v0.6-beta8.7-Marmota-real-record-lab</h1>
+      <div class="subtitle">Marmota Real-Record Sync Lab 🦫☁️</div>
+      <div class="small" id="buildHealth" style="margin-top:6px;font-weight:800">Build beta8.7 • checking local data…</div>
     </div>
     <div class="believe">BELIEVE</div>
   </div>
@@ -383,6 +393,8 @@
     <textarea id="notes" class="notes-box"
       placeholder="Crew notes, access issues, material needs, hold-off details, etc."></textarea>
 
+    <div class="marmota-lab" id="marmotaLab"><div class="marmota-head"><strong>🦫 Marmota Real-Record Lab</strong><span class="marmota-pill">ONE POLE ONLY</span></div><div class="small" style="margin-top:6px">Explicit test controls only. Saves the current real PolePilot card locally first, then queues its status, notes and manual feeder for Supabase.</div><div class="marmota-actions"><button id="marmotaPush" class="primary" type="button">⬆️ Queue Current Pole</button><button id="marmotaPull" type="button">⬇️ Pull Current Pole</button></div><div id="marmotaSyncState" class="sync-state sync-local">LOCAL • nothing queued</div><div id="marmotaQueueInfo" class="small" style="margin-top:7px">Real-record pending queue: 0</div><div id="marmotaFeedback" class="feedback"></div><div id="marmotaResult" class="marmota-result">No real cloud record loaded yet.</div></div>
+
     <button id="saveNext" class="primary">
       Save & Next →
     </button>
@@ -414,6 +426,32 @@
   </div>
 
 
+
+
+  <div class="card cloud-test" id="cloudTestCard">
+    <strong>☁️ Supabase Test Bench <span class="cloud-pill">TEST DATA ONLY</span></strong>
+    <p class="small">Isolated cloud test. This does not upload your PolePilot work list or photos.</p>
+    <input id="cloudEmail" type="email" autocomplete="username" placeholder="Test account email">
+    <input id="cloudPassword" type="password" autocomplete="current-password" placeholder="Test account password">
+    <div class="cloud-test-grid">
+      <button id="cloudSignIn" type="button">Sign In</button>
+      <button id="cloudSignOut" type="button">Sign Out</button>
+    </div>
+    <div id="cloudAuthState" class="feedback">Not signed in.</div>
+    <hr style="border:none;border-top:1px solid #bfdbfe;margin:14px 0">
+    <input id="cloudBarcode" type="text" value="ROOKTEST01" placeholder="Fake barcode">
+    <input id="cloudPA" type="text" value="CLOUDTEST" placeholder="Fake PA">
+    <input id="cloudStatus" type="text" value="Open" placeholder="Fake status">
+    <input id="cloudNotes" type="text" value="Hello from this device" placeholder="Fake note">
+    <div class="cloud-test-grid">
+      <button id="cloudPush" class="primary" type="button">💾 Save / Queue Test Pole</button>
+      <button id="cloudPull" type="button">⬇️ Pull From Cloud</button>
+    </div>
+    <div id="cloudSyncState" class="sync-state sync-local">LOCAL • nothing queued</div>
+    <div class="small" id="cloudQueueInfo" style="margin-top:7px">Pending queue: 0</div>
+    <div id="cloudFeedback" class="feedback"></div>
+    <div id="cloudResult" class="cloud-result">No cloud record loaded yet.</div>
+  </div>
 
   <div class="endday-card">
     <div class="endday-title">End of Day</div>
@@ -560,6 +598,7 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const DATA_KEY = "polepilot-v04-data"; // legacy v0.5.x migration source only
 const INDEX_KEY = "polepilot-v04-index";
@@ -2139,7 +2178,7 @@ let pendingRestoreName = "";
 
 function updateBuildHealth() {
   const el = document.getElementById("buildHealth");
-  if (el) el.textContent = "Build beta8.4 • " + rows.length.toLocaleString() + " Active Work records";
+  if (el) el.textContent = "Build beta8.7 • " + rows.length.toLocaleString() + " Active Work records";
   const last = document.getElementById("lastBackup");
   let meta = null;
   try { meta = JSON.parse(localStorage.getItem("polepilot-last-backup-v1") || "null"); } catch {}
@@ -3123,6 +3162,216 @@ document.getElementById("regionSearch").addEventListener("input",()=>{
   clearTimeout(window._ppRegionTimer);
   window._ppRegionTimer=setTimeout(regionalLookup,120);
 });
+
+// beta8.7 Marmota real-record lab
+const PP_MARMOTA_QUEUE_KEY="polepilot-beta87-marmota-work-queue";let ppMarmotaBusy=false;
+function ppMarmotaGetQueue(){try{return JSON.parse(localStorage.getItem(PP_MARMOTA_QUEUE_KEY)||"[]")}catch{return[]}}
+function ppMarmotaSetQueue(q){localStorage.setItem(PP_MARMOTA_QUEUE_KEY,JSON.stringify(q));ppMarmotaRenderState()}
+function ppMarmotaSetState(k,t){const e=document.getElementById("marmotaSyncState");if(!e)return;e.className="sync-state sync-"+k;e.textContent=t}
+function ppMarmotaRenderState(){const q=ppMarmotaGetQueue(),i=document.getElementById("marmotaQueueInfo");if(i)i.textContent="Real-record pending queue: "+q.length+(navigator.onLine?" • online":" • OFFLINE");if(ppMarmotaBusy)return ppMarmotaSetState("syncing","SYNCING • "+q.length+" pending");if(!navigator.onLine)return ppMarmotaSetState("offline",q.length?"OFFLINE • "+q.length+" pending":"OFFLINE • queue empty");if(q.length)return ppMarmotaSetState("pending","PENDING • "+q.length+" queued");ppMarmotaSetState("synced","SYNCED • queue empty")}
+function ppMarmotaRecordFromRow(r,u){return{user_id:u.id,barcode:String(r.Barcode||"").trim().toUpperCase(),pa:String(r.PA||"").trim().toUpperCase(),status:String(r["Amidyne Status"]||"").trim(),notes:String(r["Notes"]||"").trim(),manual_feeder_id:String(r["Manual Feeder ID"]||r["Feeder ID"]||"").trim().toUpperCase(),device_id:ppDeviceId(),source_updated_at:r["Last Updated"]||new Date().toISOString(),updated_at:new Date().toISOString()}}
+function ppMarmotaQueueRecord(item){const q=ppMarmotaGetQueue(),k=item.record.user_id+"|"+item.record.barcode+"|"+item.record.pa,i=q.findIndex(x=>x.record.user_id+"|"+x.record.barcode+"|"+x.record.pa===k);if(i>=0)q[i]=item;else q.push(item);ppMarmotaSetQueue(q)}
+async function ppMarmotaFlush(){if(ppMarmotaBusy||!navigator.onLine)return;let q=ppMarmotaGetQueue();if(!q.length)return ppMarmotaRenderState();const user=await ppResolveOnlineUser();if(!user){ppMarmotaSetState("pending","PENDING • sign in to sync");marmotaFeedback.textContent="Real pole is safely queued locally. Sign in while online to sync it.";return}ppMarmotaBusy=true;ppMarmotaRenderState();try{while(q.length&&navigator.onLine){const item=q[0];if(item.record.user_id!==user.id)throw new Error("Queued real record belongs to a different signed-in user.");const {data,error}=await ppCloud.from("polepilot_work_sync_lab").upsert(item.record,{onConflict:"user_id,barcode,pa"}).select().single();if(error)throw error;marmotaResult.textContent=JSON.stringify(data,null,2);q.shift();ppMarmotaSetQueue(q)}marmotaFeedback.textContent=q.length?"Connection interrupted — remaining real changes are still local.":"✓ MARMOTA SYNCED REAL POLE TO CANADA CENTRAL";marmotaFeedback.className=q.length?"feedback":"feedback saved"}catch(e){marmotaFeedback.textContent="Marmota sync paused: "+(e.message||e)+" • real change kept locally.";marmotaFeedback.className="feedback danger";ppMarmotaSetState("error","ERROR • "+q.length+" safely queued")}finally{ppMarmotaBusy=false;ppMarmotaRenderState()}}
+document.getElementById("marmotaPush").addEventListener("click",async()=>{if(!rows.length)return;const r=rows[currentIndex];if(selectedStatus)r["Amidyne Status"]=selectedStatus;r["Notes"]=document.getElementById("notes").value.trim();const m=String(document.getElementById("manualFeederInput").value||"").trim().toUpperCase();if(m){r["Manual Feeder ID"]=m;r["Feeder ID"]=m;r["Circuit Source"]="Manual Field Maps entry"}r["Last Updated"]=new Date().toISOString();await idbPutWorkRow(r);let u=navigator.onLine?await ppResolveOnlineUser():ppGetCachedUser();if(!u)u=ppGetCachedUser();if(!u){marmotaFeedback.textContent="Sign in once in the Supabase Test Bench while online before Marmota offline testing.";marmotaFeedback.className="feedback danger";return}const item={queue_id:(crypto.randomUUID?crypto.randomUUID():"mw-"+Date.now()),queued_at:new Date().toISOString(),record:ppMarmotaRecordFromRow(r,u)};ppMarmotaQueueRecord(item);marmotaResult.textContent=JSON.stringify({local_real_queue:item},null,2);if(!navigator.onLine){marmotaFeedback.textContent="✓ REAL POLE SAVED LOCALLY — Marmota will sync it when service returns.";marmotaFeedback.className="feedback saved";return ppMarmotaRenderState()}marmotaFeedback.textContent="Real pole saved locally; syncing…";await ppMarmotaFlush()});
+document.getElementById("marmotaPull").addEventListener("click",async()=>{if(!rows.length)return;if(!navigator.onLine){marmotaFeedback.textContent="Pull needs a connection. Any queued real changes remain safe.";marmotaFeedback.className="feedback danger";return}const u=await ppResolveOnlineUser();if(!u){marmotaFeedback.textContent="Sign in in the Supabase Test Bench first.";return}await ppMarmotaFlush();const r=rows[currentIndex],b=String(r.Barcode||"").trim().toUpperCase(),p=String(r.PA||"").trim().toUpperCase();const {data,error}=await ppCloud.from("polepilot_work_sync_lab").select("barcode,pa,status,notes,manual_feeder_id,device_id,source_updated_at,updated_at").eq("user_id",u.id).eq("barcode",b).eq("pa",p).maybeSingle();if(error){marmotaFeedback.textContent="Marmota pull failed: "+error.message;marmotaFeedback.className="feedback danger";return}if(!data){marmotaFeedback.textContent="No cloud record exists yet for this exact real pole.";marmotaResult.textContent="No real cloud record.";return}r["Amidyne Status"]=data.status||"";r["Notes"]=data.notes||"";if(data.manual_feeder_id){r["Manual Feeder ID"]=data.manual_feeder_id;r["Feeder ID"]=data.manual_feeder_id;r["Circuit Source"]="Cloud-synced manual Field Maps entry"}r["Last Updated"]=data.source_updated_at||data.updated_at||new Date().toISOString();await idbPutWorkRow(r);selectedStatus=r["Amidyne Status"]||"";renderPole();marmotaResult.textContent=JSON.stringify(data,null,2);marmotaFeedback.textContent="✓ REAL POLE PULLED INTO LOCAL POLEPILOT";marmotaFeedback.className="feedback saved";ppMarmotaRenderState()});
+window.addEventListener("online",()=>{ppMarmotaRenderState();setTimeout(ppMarmotaFlush,100)});window.addEventListener("offline",ppMarmotaRenderState);ppMarmotaRenderState();
+
+// beta8.6.1 isolated Supabase offline-sync test bench — cached auth identity fix
+const PP_SUPABASE_URL = "https://tqzzzsbmgsvuadcmtzmy.supabase.co";
+const PP_SUPABASE_KEY = "sb_publishable_58YYYS3ut9RiCfCFFO1IYw_iS-0o5gA";
+const PP_SYNC_QUEUE_KEY = "polepilot-beta86-sync-queue";
+const PP_CACHED_USER_KEY = "polepilot-beta861-cached-user";
+const ppCloud = window.supabase.createClient(PP_SUPABASE_URL, PP_SUPABASE_KEY);
+let ppSyncBusy = false;
+
+function ppDeviceId(){
+  let id=localStorage.getItem("polepilot-cloud-device-id");
+  if(!id){
+    id="pp-"+Math.random().toString(36).slice(2,8)+"-"+Date.now().toString(36);
+    localStorage.setItem("polepilot-cloud-device-id",id);
+  }
+  return id;
+}
+function ppGetQueue(){try{return JSON.parse(localStorage.getItem(PP_SYNC_QUEUE_KEY)||"[]");}catch{return[];}}
+function ppSetQueue(q){localStorage.setItem(PP_SYNC_QUEUE_KEY,JSON.stringify(q));ppRenderQueueState();}
+function ppCacheUser(user){
+  if(!user?.id)return;
+  localStorage.setItem(PP_CACHED_USER_KEY,JSON.stringify({id:user.id,email:user.email||"",cached_at:new Date().toISOString()}));
+}
+function ppGetCachedUser(){
+  try{const user=JSON.parse(localStorage.getItem(PP_CACHED_USER_KEY)||"null");return user?.id?user:null;}
+  catch{return null;}
+}
+function ppClearCachedUser(){localStorage.removeItem(PP_CACHED_USER_KEY);}
+function ppSetState(kind,text){
+  const el=document.getElementById("cloudSyncState");
+  if(!el)return;
+  el.className="sync-state sync-"+kind;
+  el.textContent=text;
+}
+function ppRenderQueueState(){
+  const q=ppGetQueue(), info=document.getElementById("cloudQueueInfo");
+  if(info)info.textContent="Pending queue: "+q.length+(navigator.onLine?" • online":" • OFFLINE");
+  if(ppSyncBusy){ppSetState("syncing","SYNCING • "+q.length+" pending");return;}
+  if(!navigator.onLine){ppSetState("offline",q.length?"OFFLINE • "+q.length+" pending":"OFFLINE • queue empty");return;}
+  if(q.length){ppSetState("pending","PENDING • "+q.length+" queued");return;}
+  ppSetState("synced","SYNCED • queue empty");
+}
+async function ppResolveOnlineUser(){
+  if(!navigator.onLine)return null;
+  try{
+    const {data:{user},error}=await ppCloud.auth.getUser();
+    if(error||!user)return null;
+    ppCacheUser(user);
+    return user;
+  }catch{return null;}
+}
+async function ppRenderAuth(){
+  const el=document.getElementById("cloudAuthState");
+  if(navigator.onLine){
+    try{
+      const {data:{session}}=await ppCloud.auth.getSession();
+      if(session?.user){
+        ppCacheUser(session.user);
+        el.textContent="✓ Signed in: "+session.user.email+" • Device "+ppDeviceId();
+        el.className="feedback saved";
+      }else{
+        const cached=ppGetCachedUser();
+        el.textContent=cached?"Cached user: "+(cached.email||cached.id)+" • Device "+ppDeviceId():"Not signed in. • Device "+ppDeviceId();
+        el.className="feedback";
+      }
+    }catch{
+      const cached=ppGetCachedUser();
+      el.textContent=cached?"Cached user: "+(cached.email||cached.id)+" • Device "+ppDeviceId():"Not signed in. • Device "+ppDeviceId();
+      el.className="feedback";
+    }
+  }else{
+    const cached=ppGetCachedUser();
+    el.textContent=cached?"✓ Offline identity cached: "+(cached.email||cached.id)+" • Device "+ppDeviceId():"Offline • no cached user yet • Device "+ppDeviceId();
+    el.className=cached?"feedback saved":"feedback";
+  }
+  ppRenderQueueState();
+}
+function ppMakeQueueItem(user){
+  return {queue_id:(crypto.randomUUID?crypto.randomUUID():"q-"+Date.now()+"-"+Math.random().toString(36).slice(2)),queued_at:new Date().toISOString(),record:{
+    user_id:user.id,
+    barcode:cloudBarcode.value.trim().toUpperCase(),
+    pa:cloudPA.value.trim().toUpperCase(),
+    status:cloudStatus.value.trim(),
+    notes:cloudNotes.value.trim(),
+    device_id:ppDeviceId(),
+    updated_at:new Date().toISOString()
+  }};
+}
+function ppQueueRecord(item){
+  const q=ppGetQueue();
+  const key=item.record.user_id+"|"+item.record.barcode+"|"+item.record.pa;
+  const i=q.findIndex(x=>(x.record.user_id+"|"+x.record.barcode+"|"+x.record.pa)===key);
+  if(i>=0)q[i]=item;else q.push(item);
+  ppSetQueue(q);
+}
+async function ppFlushQueue(){
+  if(ppSyncBusy||!navigator.onLine)return;
+  let q=ppGetQueue();
+  if(!q.length){ppRenderQueueState();return;}
+  const user=await ppResolveOnlineUser();
+  if(!user){
+    ppSetState("pending","PENDING • sign in to sync");
+    cloudFeedback.textContent="Pending changes are safe locally. Sign in while online to flush them.";
+    cloudFeedback.className="feedback";
+    return;
+  }
+  ppSyncBusy=true;ppRenderQueueState();
+  try{
+    while(q.length&&navigator.onLine){
+      const item=q[0];
+      if(item.record.user_id!==user.id)throw new Error("Queued record belongs to a different signed-in user.");
+      const {data,error}=await ppCloud.from("polepilot_sync_test").upsert(item.record,{onConflict:"user_id,barcode,pa"}).select().single();
+      if(error)throw error;
+      cloudResult.textContent=JSON.stringify(data,null,2);
+      q.shift();ppSetQueue(q);
+    }
+    cloudFeedback.textContent=q.length?"Connection interrupted — remaining changes kept locally.":"✓ QUEUE SYNCED TO CANADA CENTRAL";
+    cloudFeedback.className=q.length?"feedback":"feedback saved";
+  }catch(e){
+    cloudFeedback.textContent="Sync paused: "+(e.message||e)+" • queued change kept locally.";
+    cloudFeedback.className="feedback danger";
+    ppSetState("error","ERROR • "+q.length+" safely queued");
+  }finally{ppSyncBusy=false;ppRenderQueueState();}
+}
+cloudSignIn.addEventListener("click",async()=>{
+  if(!navigator.onLine){cloudFeedback.textContent="Offline — sign-in needs a connection.";cloudFeedback.className="feedback danger";return;}
+  cloudFeedback.textContent="Signing in…";
+  const {data,error}=await ppCloud.auth.signInWithPassword({email:cloudEmail.value.trim(),password:cloudPassword.value});
+  if(error){cloudFeedback.textContent="Sign-in failed: "+error.message;cloudFeedback.className="feedback danger";return;}
+  if(data?.user)ppCacheUser(data.user);
+  cloudFeedback.textContent="✓ Signed in and cached for offline use.";
+  cloudFeedback.className="feedback saved";
+  await ppRenderAuth();await ppFlushQueue();
+});
+cloudSignOut.addEventListener("click",async()=>{
+  if(navigator.onLine){try{await ppCloud.auth.signOut();}catch{}}
+  ppClearCachedUser();
+  cloudFeedback.textContent="Signed out and cached offline identity cleared.";
+  cloudFeedback.className="feedback";
+  await ppRenderAuth();
+});
+cloudPush.addEventListener("click",async()=>{
+  let user=navigator.onLine?await ppResolveOnlineUser():ppGetCachedUser();
+  if(!user)user=ppGetCachedUser();
+  if(!user){
+    cloudFeedback.textContent="Sign in once while online before testing offline queueing.";
+    cloudFeedback.className="feedback danger";
+    return;
+  }
+  const item=ppMakeQueueItem(user);
+  ppQueueRecord(item);
+  cloudResult.textContent=JSON.stringify({local_queue:item},null,2);
+  if(!navigator.onLine){
+    cloudFeedback.textContent="✓ SAVED LOCALLY — offline queue accepted. It will sync when connection returns.";
+    cloudFeedback.className="feedback saved";
+    ppRenderQueueState();
+    return;
+  }
+  cloudFeedback.textContent="Saved locally; syncing…";
+  cloudFeedback.className="feedback";
+  await ppFlushQueue();
+});
+cloudPull.addEventListener("click",async()=>{
+  if(!navigator.onLine){
+    cloudFeedback.textContent="Pull needs a connection. Pending local changes are safe.";
+    cloudFeedback.className="feedback danger";
+    ppRenderQueueState();
+    return;
+  }
+  const user=await ppResolveOnlineUser();
+  if(!user){cloudFeedback.textContent="Sign in first.";cloudFeedback.className="feedback danger";return;}
+  await ppFlushQueue();
+  cloudFeedback.textContent="Pulling from cloud…";
+  const {data,error}=await ppCloud.from("polepilot_sync_test").select("barcode,pa,status,notes,device_id,updated_at").eq("user_id",user.id).eq("barcode",cloudBarcode.value.trim().toUpperCase()).eq("pa",cloudPA.value.trim().toUpperCase()).maybeSingle();
+  if(error){cloudFeedback.textContent="Pull failed: "+error.message;cloudFeedback.className="feedback danger";return;}
+  if(!data){cloudFeedback.textContent="No matching cloud test pole yet.";cloudResult.textContent="No record.";return;}
+  cloudStatus.value=data.status||"";cloudNotes.value=data.notes||"";cloudResult.textContent=JSON.stringify(data,null,2);
+  cloudFeedback.textContent="✓ PULLED FROM CLOUD";cloudFeedback.className="feedback saved";ppRenderQueueState();
+});
+window.addEventListener("online",()=>{
+  cloudFeedback.textContent="Connection restored — flushing pending queue…";
+  cloudFeedback.className="feedback";
+  ppRenderAuth();
+  ppFlushQueue();
+});
+window.addEventListener("offline",()=>{
+  cloudFeedback.textContent="Offline — new saves will stay on this device.";
+  cloudFeedback.className="feedback";
+  ppRenderAuth();
+});
+ppCloud.auth.onAuthStateChange((_event,session)=>{
+  if(session?.user)ppCacheUser(session.user);
+  ppRenderAuth();
+  if(navigator.onLine)setTimeout(ppFlushQueue,0);
+});
+ppRenderAuth();ppRenderQueueState();
+
 setQueueModeUI();
 initializeStorage().then(updateBuildHealth);
 setTimeout(updateBuildHealth, 1000);
